@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kashumy Pianino</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    position: fixed; width:100vw; height:100vh;
+    user-zoom: none;
+    justify-content: center;
+    overflow-x: scroll;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+  }
+
+  .keyboard {
+    position: relative;
+    overflow-x: scroll;
+    width: 100%;
+    max-width: 1050px;
+    height: 203px;
+    background:#5B5B5B;
+    zoom:0.5
+    
+  }
+  
+  .key {
+    position: absolute;
+    font-size: 30px;
+    display:flex;
+    justify-content: center;
+    align-items:end ;
+    width: 50px;
+    height: 200px;
+    border: 1px solid #000;
+    background-color: #FFFFFF;
+  }
+  .key:active{
+    transform: translate(0,-5px);
+    animation: 0.5s blued ;
+  }
+  @keyframes blued{
+    0%{
+      background:#898989
+    }
+    100%{
+      
+    }
+  }
+  .black-key {
+    background-color: #000;
+    width:35px;
+    height: 100px;
+    margin-top: -10px;
+    margin: 0;
+    z-index: 1;
+  }
+  
+
+  .active {
+    background-color: #4CCDF0;
+  }
+</style>
+</head>
+<body>
+<!--  i spend 7 fucking hours on this -->
+<div class="keyboard">
+  <div id="key1" class="key white-key">c</div>
+  <div id="key2" class="key black-key" style="margin-left: 25px"></div>
+  <div id="key3" class="key white-key" style="margin-left: 50px">d</div>
+  <div id="key4" class="key black-key" style="margin-left: 75px"></div>
+  <div id="key5" class="key white-key" style="margin-left: 100px">e</div>
+  <div id="key6" class="key white-key" style="margin-left: 150px">f</div>
+  <div id="key7" class="key black-key" style="margin-left: 175px"></div>
+  <div id="key8" class="key white-key" style="margin-left: 200px">g</div>
+  <div id="key9" class="key black-key" style="margin-left: 225px"></div>
+  <div id="key10" class="key white-key" style="margin-left: 250px">a</div>
+  <div id="key11" class="key black-key" style="margin-left: 275px"></div>
+  <div id="key12" class="key white-key" style="margin-left: 300px">h</div>
+  
+  
+   <div id="key13" class="key white-key" style="margin-left: 350px">c</div>
+  <div id="key14" class="key black-key" style="margin-left: 375px"></div>
+  <div id="key15" class="key white-key" style="margin-left: 400px">d</div>
+  <div id="key16" class="key black-key" style="margin-left: 425px"></div>
+  <div id="key17" class="key white-key" style="margin-left: 450px">e</div>
+  <div id="key18" class="key white-key" style="margin-left: 500px">f</div>
+  <div id="key19" class="key black-key" style="margin-left: 525px"></div>
+  <div id="key20" class="key white-key" style="margin-left: 550px">g</div>
+  <div id="key21" class="key black-key" style="margin-left: 575px"></div>
+  <div id="key22" class="key white-key" style="margin-left: 600px">a</div>
+  <div id="key23" class="key black-key" style="margin-left: 625px"></div>
+  <div id="key24" class="key white-key" style="margin-left: 650px">h</div>
+  
+<div id="key25" class="key white-key" style="margin-left: 700px">c</div>
+<div id="key26" class="key black-key" style="margin-left: 725px"></div>
+<div id="key27" class="key white-key" style="margin-left: 750px">d</div>
+<div id="key28" class="key black-key" style="margin-left: 775px"></div>
+<div id="key29" class="key white-key" style="margin-left: 800px">e</div>
+<div id="key30" class="key white-key" style="margin-left: 850px">f</div>
+<div id="key31" class="key black-key" style="margin-left: 875px"></div>
+<div id="key32" class="key white-key" style="margin-left: 900px">g</div>
+<div id="key33" class="key black-key" style="margin-left: 925px"></div>
+<div id="key34" class="key white-key" style="margin-left: 950px">a</div>
+<div id="key35" class="key black-key" style="margin-left: 975px"></div>
+<div id="key36" class="key white-key" style="margin-left: 1000px">h</div>
+
+</div>
+
+<script>
+  const frequencies = {
+    'key1': 261.63,   // C4
+    'key2': 277.18,   // C#4/Db4
+    'key3': 293.66,   // D4
+    'key4': 311.13,   // D#4/Eb4
+    'key5': 329.63,   // E4
+    'key6': 349.23,   // F4
+    'key7': 369.99,   // F#4/Gb4
+    'key8': 392.00,   // G4
+    'key9': 415.30,   // G#4/Ab4
+    'key10': 440.00,  // A4
+    'key11': 466.16,  // A#4/Bb4
+    'key12': 493.88,  // B4
+    'key13': 523.25,  // C5
+    'key14': 554.37,  // C#5/Db5
+    'key15': 587.33,  // D5
+    'key16': 622.25,  // D#5/Eb5
+    'key17': 659.25,  // E5
+    'key18': 698.46,  // F5
+    'key19': 739.99,  // F#5/Gb5
+    'key20': 783.99,  // G5
+    'key21': 830.61,  // G#5/Ab5
+    'key22': 880.00,  // A5
+    'key23': 932.33,  // A#5/Bb5
+    'key24': 987.77,  // B5
+    'key25': 1046.50, // C6
+    'key26': 1108.73, // C#6/Db6
+    'key27': 1174.66, // D6
+    'key28': 1244.51, // D#6/Eb6
+    'key29': 1318.51, // E6
+    'key30': 1396.91, // F6
+    'key31': 1479.98, // F#6/Gb6
+    'key32': 1567.98, // G6
+    'key33': 1661.22, // G#6/Ab6
+    'key34': 1760.00, // A6
+    'key35': 1864.66, // A#6/Bb6
+    'key36': 1975.53  // B6
+
+  };
+</script>
+
+
+
+<script>
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
+
+
+  function playSound(frequency) {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(1, audioContext.currentTime); // Full volume
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1); // Exponential decay
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 1); 
+  }
+  
+
+  const pianoKeys = document.querySelectorAll('.key');
+  
+  pianoKeys.forEach(key => {
+    key.addEventListener('mousedown', () => {
+      key.classList.add('active');
+      const id = key.id;
+      const frequency = frequencies[id];
+      if (frequency) {
+        playSound(frequency);
+      }
+    });
+    
+    key.addEventListener('mouseup', () => {
+      key.classList.remove('active');
+    });
+    
+    key.addEventListener('mouseleave', () => {
+      key.classList.remove('active');
+    });
+  });
+</script>
+
+</body>
+</html>
