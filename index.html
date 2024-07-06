@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" onclick="setTimeout(document.documentElement.requestFullscreen(),1500)">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,13 +20,13 @@
 
   .keyboard {
     position: relative;
+    margin-top:30vh;
     overflow-x: scroll;
     width: 100%;
     max-width: 1050px;
     height: 203px;
     background:#5B5B5B;
-    zoom:0.5
-    
+    zoom:0.8
   }
   
   .key {
@@ -69,7 +68,25 @@
 </style>
 </head>
 <body>
-<!--  i spend 7 fucking hours on this -->
+  <div style="position:absolute; top:50px;">
+    duration:
+<select id="durationL">
+  <option value="500">500</option>
+  <option value="1000">1000</option>
+  <option value="1500">1500</option>
+  <option value="2000">2000</option>
+  <option value="2500">2500</option>
+  <option value="3000">3000</option>
+</select>
+<br>
+<button id="startRecordingButton">start recording</button>
+<button id="stopRecordingButton" disabled>stop recording</button>
+<button onclick="playMusic(music)">play recorded music</button>
+<button onclick="recordreset()">reset record</button>
+<button onclick="saveAsBlob()">save as blob</button>
+<button onclick="removefrombuttonstext()">notext</button>
+  </div>
+
 <div class="keyboard">
   <div id="key1" class="key white-key">c</div>
   <div id="key2" class="key black-key" style="margin-left: 25px"></div>
@@ -83,9 +100,7 @@
   <div id="key10" class="key white-key" style="margin-left: 250px">a</div>
   <div id="key11" class="key black-key" style="margin-left: 275px"></div>
   <div id="key12" class="key white-key" style="margin-left: 300px">h</div>
-  
-  
-   <div id="key13" class="key white-key" style="margin-left: 350px">c</div>
+  <div id="key13" class="key white-key" style="margin-left: 350px">c</div>
   <div id="key14" class="key black-key" style="margin-left: 375px"></div>
   <div id="key15" class="key white-key" style="margin-left: 400px">d</div>
   <div id="key16" class="key black-key" style="margin-left: 425px"></div>
@@ -97,23 +112,22 @@
   <div id="key22" class="key white-key" style="margin-left: 600px">a</div>
   <div id="key23" class="key black-key" style="margin-left: 625px"></div>
   <div id="key24" class="key white-key" style="margin-left: 650px">h</div>
-  
-<div id="key25" class="key white-key" style="margin-left: 700px">c</div>
-<div id="key26" class="key black-key" style="margin-left: 725px"></div>
-<div id="key27" class="key white-key" style="margin-left: 750px">d</div>
-<div id="key28" class="key black-key" style="margin-left: 775px"></div>
-<div id="key29" class="key white-key" style="margin-left: 800px">e</div>
-<div id="key30" class="key white-key" style="margin-left: 850px">f</div>
-<div id="key31" class="key black-key" style="margin-left: 875px"></div>
-<div id="key32" class="key white-key" style="margin-left: 900px">g</div>
-<div id="key33" class="key black-key" style="margin-left: 925px"></div>
-<div id="key34" class="key white-key" style="margin-left: 950px">a</div>
-<div id="key35" class="key black-key" style="margin-left: 975px"></div>
-<div id="key36" class="key white-key" style="margin-left: 1000px">h</div>
-
+  <div id="key25" class="key white-key" style="margin-left: 700px">c</div>
+  <div id="key26" class="key black-key" style="margin-left: 725px"></div>
+  <div id="key27" class="key white-key" style="margin-left: 750px">d</div>
+  <div id="key28" class="key black-key" style="margin-left: 775px"></div>
+  <div id="key29" class="key white-key" style="margin-left: 800px">e</div>
+  <div id="key30" class="key white-key" style="margin-left: 850px">f</div>
+  <div id="key31" class="key black-key" style="margin-left: 875px"></div>
+  <div id="key32" class="key white-key" style="margin-left: 900px">g</div>
+  <div id="key33" class="key black-key" style="margin-left: 925px"></div>
+  <div id="key34" class="key white-key" style="margin-left: 950px">a</div>
+  <div id="key35" class="key black-key" style="margin-left: 975px"></div>
+  <div id="key36" class="key white-key" style="margin-left: 1000px">h</div>
 </div>
 
 <script>
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const frequencies = {
     'key1': 261.63,   // C4
     'key2': 277.18,   // C#4/Db4
@@ -151,33 +165,42 @@
     'key34': 1760.00, // A6
     'key35': 1864.66, // A#6/Bb6
     'key36': 1975.53  // B6
-
   };
-</script>
 
+  let startTime = 0;  // Store the start time of the recording session
+  let isRecording = false;
+  let recordedNotes = [];
 
-
-<script>
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  
-
+  function recordreset(){
+    recordedNotes = [];
+    audioContext.currentTime = 0;
+  }
 
   function playSound(frequency) {
     const oscillator = audioContext.createOscillator();
     oscillator.type = 'square';
     oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-    
     const gainNode = audioContext.createGain();
-    gainNode.gain.setValueAtTime(1, audioContext.currentTime); // Full volume
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1); // Exponential decay
+    let volume = 0.5;
+    let volumeEasing = 1;
+    let duration = parseFloat(document.getElementById('durationL').value);
+
+    if (volumeEasing === 0) {
+      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+    } else if (volumeEasing === 1) {
+      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration / 1000);
+    } else if (volumeEasing > 1) {
+      gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(volume, audioContext.currentTime + duration / (volumeEasing * 1000));
+    }
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 1); 
+    oscillator.stop(audioContext.currentTime + duration / 1000);
   }
-  
 
   const pianoKeys = document.querySelectorAll('.key');
   
@@ -188,6 +211,9 @@
       const frequency = frequencies[id];
       if (frequency) {
         playSound(frequency);
+        if (isRecording) {
+          recordedNotes.push([frequency, performance.now() - startTime, parseFloat(document.getElementById('durationL').value), 0.5, 1]);
+        }
       }
     });
     
@@ -199,7 +225,138 @@
       key.classList.remove('active');
     });
   });
+
+  document.getElementById('startRecordingButton').addEventListener('click', () => {
+    isRecording = true;
+    startTime = performance.now();
+    recordedNotes = [];
+    document.getElementById('startRecordingButton').disabled = true;
+    document.getElementById('stopRecordingButton').disabled = false;
+  });
+
+  document.getElementById('stopRecordingButton').addEventListener('click', () => {
+    isRecording = false;
+    document.getElementById('startRecordingButton').disabled = false;
+    document.getElementById('stopRecordingButton').disabled = true;
+    music[1].notes = recordedNotes.map(note => {
+      const [frequency, startTime, duration, volume, volumeEasing] = note;
+      return [frequency, startTime, duration, volume, volumeEasing];
+    });
+  });
+
+  function saveAsBlob() {
+    const blob = new Blob([JSON.stringify(music)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'music.mm3';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function removefrombuttonstext() {
+    const pianoKeys = document.querySelectorAll('.key');
+    pianoKeys.forEach(key => {
+      key.innerText = "";
+    });
+  }
+
+  async function playTone(audioContext, frequency, duration, volume, customInstrument, volumeEasing) {
+    return new Promise(resolve => {
+      const oscillator = audioContext.createOscillator();
+      let type = 'square';
+
+      switch (customInstrument) {
+        case "sine":
+          type = 'sine';
+          break;
+        case "square":
+          type = 'square';
+          break;
+        case "sawtooth":
+          type = 'sawtooth';
+          break;
+        case "triangle":
+          type = 'triangle';
+          break;
+        default:
+          type = customInstrument;
+          break;
+      }
+
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+      const gainNode = audioContext.createGain();
+
+      if (volumeEasing === 0) {
+        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+      } else if (volumeEasing === 1) {
+        gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration / 1000);
+      } else if (volumeEasing > 1) {
+        gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(volume, audioContext.currentTime + duration / (volumeEasing * 1000));
+      }
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + duration / 1000);
+
+      oscillator.onended = resolve;
+    });
+  }
+
+  async function playSection(audioContext, sectionId) {
+    const section = music[sectionId];
+    const { notes, instrument, nextSection, runallnotes } = section;
+    const tempo = section.tempo || music.tempo;
+
+    if (runallnotes) {
+      const promises = notes.map(([hz, timeout, length, volume, volumeEasing]) => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            playTone(audioContext, hz, length / tempo, volume, instrument, volumeEasing).then(resolve);
+          }, timeout / tempo);
+        });
+      });
+      await Promise.all(promises);
+    } else {
+      for (const note of notes) {
+        const [hz, timeout, length, volume, volumeEasing] = note;
+        await playTone(audioContext, hz, length / tempo, volume, instrument, volumeEasing);
+        await new Promise(resolve => setTimeout(resolve, timeout / tempo));
+      }
+    }
+
+    if (nextSection !== null) {
+      await playSection(audioContext, nextSection);
+    }
+  }
+
+  async function playMusic(name) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const runSections = name.run;
+
+    const promises = runSections.map(sectionId => playSection(audioContext, sectionId));
+    await Promise.all(promises);
+  }
+
+  // Initialize the music object
+  var music = {
+    tempo: 1,  // default tempo
+    run: [1],  // sections to run
+    1: {
+      notes: [],
+      instrument: 'square',
+      nextSection: null,
+      runallnotes: 1
+    }
+  };
 </script>
 
 </body>
 </html>
+
